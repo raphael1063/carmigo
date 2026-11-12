@@ -990,7 +990,7 @@ fun ExportPopup(state: AppState, sending: Sending, url: String?, onClose: () -> 
 fun WipeConfirmPopup(onNo: () -> Unit, onYes: () -> Unit) {
     IviPopup(onNo, buttons = {
         IviButton("아직이요", onNo, Modifier.weight(1f))
-        IviButton("지우기", onYes, Modifier.weight(1f), filled = true, neutral = true)
+        IviButton("지우기", onYes, Modifier.weight(1f), filled = true, danger = true)
     }) {
         PopupTitle("카미고의 기록을 지울까요?", "휴대폰에 저장한 이미지나 PDF가 열리는지 먼저 확인해 주세요. 카미고에서 지운 기록은 되돌릴 수 없습니다. 차량의 다른 앱이나 내비게이션 기록은 지우지 않습니다. 서버에 전송한 기록은 전송 후 7일 뒤 지워집니다.")
     }

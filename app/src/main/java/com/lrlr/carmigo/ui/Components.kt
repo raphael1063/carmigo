@@ -111,6 +111,8 @@ fun IviButton(
     quiet: Boolean = false,
     /** 되돌릴 수 없는 동작: 채운 버튼이어도 로고 색 대신 중립색 */
     neutral: Boolean = false,
+    /** 지우기 확인 창의 최종 단추: OS 가이드의 negative 색 */
+    danger: Boolean = false,
 ) {
     val c = Ivi.colors
     val source = remember { MutableInteractionSource() }
@@ -119,6 +121,7 @@ fun IviButton(
     val scale by animateFloatAsState(if (pressed && active) 0.95f else 1f, tween(100), label = "press")
     val bg = when {
         !active -> c.buttonBasicEnabled
+        filled && danger -> if (pressed) c.negative.copy(alpha = 0.85f) else c.negative
         filled && neutral -> if (pressed) c.buttonNeutralPressed else c.buttonNeutralEnabled
         filled -> if (pressed) c.buttonFilledPressed else c.buttonFilledEnabled
         else -> if (pressed) c.buttonBasicPressed else c.buttonBasicEnabled
@@ -126,6 +129,7 @@ fun IviButton(
     val fg = when {
         // 흐린 버튼은 누를 수 없을 때에도 읽을 수 있어야 한다("마지막 주행"은 주행 중에도 보인다)
         !active -> if (quiet) c.textTertiary else c.textQuaternary
+        filled && danger -> Color.White
         filled && neutral -> c.onButtonNeutral
         filled -> c.onButtonFilled
         quiet -> c.textTertiary
