@@ -1,0 +1,49 @@
+name: APK
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+      - name: Contest signing key (generated for this build)
+        run: |
+          keytool -genkeypair -v -keystore contest.jks -alias carmigo -keyalg RSA -keysize 2048 -validity 3650 \
+            -storepass contest-build -keypass contest-build -dname "CN=Carmigo contest build"
+          printf 'storeFile=contest.jks\nstorePassword=contest-build\nkeyAlias=carmigo\nkeyPassword=contest-build\n' > signing.properties
+      - name: Build APK
+        run: ./gradlew --no-daemon assembleDebug assembleRelease
+      - name: Name the APK
+        id: apk
+        run: |
+          VERSION=$(grep -m1 'versionName' app/build.gradle.kts | sed -E 's/.*"(.*)".*/\1/')
+          mkdir -p out
+          cp app/build/outputs/apk/release/app-release.apk "out/Carmigo-${VERSION}-release.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "out/Carmigo-${VERSION}-debug.apk"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Carmigo-${{ steps.apk.outputs.version }}
+          path: out/*.apk
+      - name: Publish to Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" out/*.apk \
+            --title "카미고 ${{ steps.apk.outputs.version }}" \
+            --notes "Pleos Connect Emulator 2.1.0에서 확인한 APK입니다. 설치: adb install -r $(ls out)"

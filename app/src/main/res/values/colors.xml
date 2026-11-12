@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pleos Connect background_primary (light: basic_50) -->
+    <color name="bg">#FFF7F8FA</color>
+</resources>

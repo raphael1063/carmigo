@@ -1,0 +1,17 @@
+{
+  "packageName": "com.lrlr.carmigo",
+  "appDescription": "Keeps the record of the time an owner spends with this car, from the day they first met to the last drive.",
+  "invokeWord": "카미고",
+  "version": "0.1.0",
+  "actionCalls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "GET_DAYS_TOGETHER",
+        "description": "Tell how many days the owner has been with this car and how far they have driven together.",
+        "parameters": { "type": "object", "properties": {}, "required": [] },
+        "component": "service"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_watch">%1$s record</string>
+    <string name="channel_moments">New moments and saved copies</string>
+    <string name="notify_moment">A new moment was kept</string>
+    <string name="notify_saved">Saved on your phone</string>
+    <string name="notify_saved_wipe">You can erase the record left in this car before handing it over</string>
+    <string name="notify_saved_plain">Your copy is on your phone</string>
+    <string name="notification_watching">Keeping the record of your time together</string>
+</resources>
