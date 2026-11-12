@@ -60,6 +60,15 @@ class BookTest {
         assertEquals(1222, b.days)
     }
 
+    @Test fun exportedLegacyCardsUseTheSameCopyAsTheCarScreen() {
+        val old = Moment("cold-2025", MomentKind.SEASON, "첫 영하의 주행", "", "예전 설명", 0)
+        val s = state.copy(moments = listOf(old))
+        val page = Books.build(s, rules, at("2026-11-20", 9, 0))!!.moments.single()
+        assertEquals(old.displayTitle, page.title)
+        assertEquals(old.displayWhy, page.why)
+        assertEquals("첫 영하의 주행", s.moments.single().title)
+    }
+
     @Test fun nothingToSendBeforeTheFirstInput() {
         assertNull(Books.build(AppState(), rules, 0))
     }
@@ -69,3 +78,4 @@ class BookTest {
         assertEquals(state, AppJson.decodeFromString<AppState>(text))
     }
 }
+

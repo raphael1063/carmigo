@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -133,7 +135,7 @@ fun OnboardingScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.widthIn(max = 880.dp).fillMaxWidth()) {
-                T(if (editing) "처음 값 고치기" else "이 차와 언제부터 함께하셨나요", Type.titleLarge, Modifier.secret(onSecret))
+                T(if (editing) "처음 등록한 정보 수정" else "이 차와 언제부터 함께하셨나요", Type.titleLarge, Modifier.secret(onSecret))
                 Spacer(Modifier.height(12.dp))
                 T(
                     if (editing) "받은 날과 그때의 주행거리, 차 이름을 고칩니다. 받은 날이나 주행거리를 바꾸면 그 값으로 계산한 함께한 날, 함께 달린 거리 카드는 지우고 다시 셉니다."
@@ -158,7 +160,7 @@ fun OnboardingScreen(
                 }
                 Spacer(Modifier.height(32.dp))
 
-                T("그때의 주행거리", Type.labelLarge, color = c.textTertiary)
+                T("차를 받았을 때 계기판 거리", Type.labelLarge, color = c.textTertiary)
                 Spacer(Modifier.height(12.dp))
                 val field: @Composable (Modifier) -> Unit = { m ->
                     Row(
@@ -232,9 +234,9 @@ fun OnboardingScreen(
                 }
                 Spacer(Modifier.height(24.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    if (onCancel != null) IviButton("그만두기", onCancel, Modifier.weight(1f), size = ButtonSize.LARGE)
+                    if (onCancel != null) IviButton("취소", onCancel, Modifier.weight(1f), size = ButtonSize.LARGE)
                     IviButton(
-                        if (editing) "고치기" else "시작", { km?.let { onStart(date.toEpochDay(), it, Fmt.cleanName(nameText)) } },
+                        if (editing) "수정 내용 저장" else "시작", { km?.let { onStart(date.toEpochDay(), it, Fmt.cleanName(nameText)) } },
                         Modifier.weight(1f), filled = true, size = ButtonSize.LARGE, enabled = km != null,
                     )
                 }
@@ -300,9 +302,14 @@ fun TopBar(
 ) {
     val setup = state.setup ?: return
     val c = Ivi.colors
-    val lastLabel = if (state.last == LastDrive.ARMED) "마지막 주행 준비됨" else "마지막 주행"
+    val lastLabel = if (state.last == LastDrive.ARMED) "마지막 주행 취소" else "마지막 주행"
     @Composable
-    fun last() { if (showLast) IviButton(lastLabel, onLast, size = ButtonSize.SMALL, enabled = lastEnabled, quiet = state.last != LastDrive.ARMED) }
+    fun last() {
+        if (showLast) Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (state.last == LastDrive.ARMED) T("다음 주행을 마지막으로 기록합니다", Type.labelSmall, color = c.textSecondary)
+            IviButton(lastLabel, onLast, size = ButtonSize.SMALL, enabled = lastEnabled, quiet = state.last != LastDrive.ARMED)
+        }
+    }
     @Composable
     fun demoTag() { if (state.demo && !minimal) IviButton("시연 모드", onDemo, size = ButtonSize.SMALL, quiet = true) }
 
@@ -352,14 +359,15 @@ fun MomentsTab(state: AppState, rules: Rules, now: Long, onOpen: (Moment) -> Uni
         if (state.moments.isEmpty()) {
             CenterBox(Modifier.padding(bottom = 80.dp)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    T("아직 남은 순간이 없습니다", Type.titleSmall)
+                    T("아직 기록된 순간이 없습니다", Type.titleSmall)
                     Spacer(Modifier.height(12.dp))
-                    T("함께 달리는 동안 기억할 만한 순간이 여기에 한 장씩 남습니다.", Type.bodySmall, color = c.textSecondary, align = TextAlign.Center)
+                    T("함께한 날과 달린 거리에서 기념할 순간을 자동으로 남깁니다.", Type.bodySmall, color = c.textSecondary, align = TextAlign.Center)
                 }
             }
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(360.dp),
+                // 카드 칸을 넓혀 "옆자리에 누군가 탄 200번째 날" 같은 제목도 한 줄에 들어가게 한다(가로 화면 3열).
+                columns = GridCells.Adaptive(480.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = 32.dp),
@@ -384,7 +392,7 @@ private fun MomentCard(m: Moment, rules: Rules, onClick: () -> Unit) {
             if (!m.seen) T("새 순간", Type.labelSmall.copy(fontWeight = Type.labelLarge.fontWeight), color = c.textPrimary)
         }
         Spacer(Modifier.height(14.dp))
-        T(m.title, Type.titleSmall, maxLines = 1)
+        T(m.displayTitle, Type.titleSmall, maxLines = 2)
         Spacer(Modifier.height(4.dp))
         T(m.line, Type.labelLarge.copy(fontWeight = Type.bodySmall.fontWeight), color = c.textSecondary, maxLines = 2)
         Spacer(Modifier.height(14.dp))
@@ -404,7 +412,7 @@ fun MomentPopup(m: Moment, rules: Rules, onClose: () -> Unit) {
         Box(Modifier.size(22.dp).clip(CircleShape).background(skyBrush(minute, m.weather?.sky)).border(2.dp, Ivi.colors.textTertiary, CircleShape))
         Spacer(Modifier.height(24.dp))
         T(m.kind.label, Type.labelLarge, color = c.textTertiary)
-        T(m.title, Type.headlineSmall)
+        T(m.displayTitle, Type.headlineSmall)
         T(m.line, Type.bodySmall, color = c.textSecondary)
         Spacer(Modifier.height(24.dp))
         Divider()
@@ -424,7 +432,7 @@ fun MomentPopup(m: Moment, rules: Rules, onClose: () -> Unit) {
             Divider()
         }
         Spacer(Modifier.height(20.dp))
-        T(m.why, Type.bodySmall, color = c.textSecondary)
+        T(m.displayWhy, Type.bodySmall, color = c.textSecondary)
     }
 }
 
@@ -466,7 +474,7 @@ private fun ColumnScope.Together(state: AppState, rules: Rules, now: Long, hero:
     val odo = state.lastOdoKm
     val together = rules.kmTogether(setup, odo)
     Spacer(Modifier.height(16.dp))
-    T("${Fmt.date(rules.date(setup.receivedDay))}부터 함께한 날", Type.labelLarge, color = c.textTertiary)
+    T("${Fmt.date(rules.date(setup.receivedDay))}부터 함께한 시간", Type.labelLarge, color = c.textTertiary)
     BigNumber(Fmt.n(rules.daysTogether(setup, now)), "일", hero)
     Spacer(Modifier.height(20.dp))
     T("함께 달린 거리", Type.labelLarge, color = c.textTertiary)
@@ -513,6 +521,7 @@ private fun BigNumber(number: String, unit: String, hero: androidx.compose.ui.te
 
 /** 앱이 지켜본 뒤로 센 것. 설치하기 전의 횟수는 어림으로도 보여 주지 않는다. */
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun ColumnScope.Counted(state: AppState, rules: Rules, now: Long, onEdit: () -> Unit, notifyOn: Boolean, onNotify: () -> Unit, onWeather: () -> Unit) {
     val setup = state.setup ?: return
     val c = Ivi.colors
@@ -520,7 +529,7 @@ private fun ColumnScope.Counted(state: AppState, rules: Rules, now: Long, onEdit
     val watched = rules.watchedDays(setup, now)
     Spacer(Modifier.height(16.dp))
     // 이 칸의 숫자는 앱을 설치해 기록을 시작한 날부터 센 것이다. 머리 줄에서 한 번만 말한다.
-    T("${Fmt.date(rules.date(setup.installedDay))}부터 센 기록", Type.labelLarge, color = c.textTertiary)
+    T("${Fmt.date(rules.date(setup.installedDay))} 기록 시작", Type.labelLarge, color = c.textTertiary)
     Spacer(Modifier.height(12.dp))
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(c.backgroundSecondary).padding(horizontal = 28.dp)) {
         Counter("도착한 횟수", "${Fmt.n(k.arrivals)}번", if (rules.arrivalMs >= 60_000) "주차하고 ${rules.arrivalMs / 60_000}분 넘게 머문 것만 셉니다" else "주차하고 머문 것만 셉니다 (시연용 설정: ${rules.arrivalMs / 1000}초)")
@@ -533,8 +542,8 @@ private fun ColumnScope.Counted(state: AppState, rules: Rules, now: Long, onEdit
         )
     }
     Spacer(Modifier.height(28.dp))
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-        IviButton("처음 값 고치기", onEdit, size = ButtonSize.SMALL, quiet = true)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        IviButton("처음 등록한 정보 수정", onEdit, size = ButtonSize.SMALL, quiet = true)
         if (!notifyOn) IviButton("주차 중 알림 받기", onNotify, size = ButtonSize.SMALL, quiet = true)
         IviButton(if (setup.stationName == null) "그날의 날씨 남기기" else "관측소 바꾸기", onWeather, size = ButtonSize.SMALL, quiet = true)
     }
@@ -676,12 +685,12 @@ fun FarewellScreen(state: AppState, rules: Rules, onExport: () -> Unit, onUndo: 
         Spacer(Modifier.height(if (wide) 24.dp else 20.dp))
         if (wide) {
             Row(Modifier.appear(2), horizontalArrangement = Arrangement.spacedBy(88.dp)) {
-                Column { T("함께한 날", Type.labelSmall, color = c.textTertiary); BigNumber(Fmt.n(rules.daysTogether(setup, end)), "일", hero) }
+                Column { T("함께한 시간", Type.labelSmall, color = c.textTertiary); BigNumber(Fmt.n(rules.daysTogether(setup, end)), "일", hero) }
                 if (km != null) Column { T("함께 달린 거리", Type.labelSmall, color = c.textTertiary); BigNumber(Fmt.km(km), "km", hero) }
             }
         } else {
             Column(Modifier.appear(2)) {
-                T("함께한 날", Type.labelSmall, color = c.textTertiary)
+                T("함께한 시간", Type.labelSmall, color = c.textTertiary)
                 BigNumber(Fmt.n(rules.daysTogether(setup, end)), "일", hero)
             }
             if (km != null) {
@@ -711,7 +720,7 @@ fun FarewellScreen(state: AppState, rules: Rules, onExport: () -> Unit, onUndo: 
             if (k.energyWh >= 1000) add("${Fmt.kwh(k.energyWh)} kWh" to "전기를 함께 썼습니다")
         }
         if (tiles.isNotEmpty()) {
-            T("${Fmt.date(rules.date(setup.installedDay))}부터 센 기록", Type.labelLarge, Modifier.appear(LATE), color = c.textTertiary)
+            T("${Fmt.date(rules.date(setup.installedDay))} 기록 시작", Type.labelLarge, Modifier.appear(LATE), color = c.textTertiary)
             Spacer(Modifier.height(12.dp))
             tiles.chunked(2).forEachIndexed { row, pair ->
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -741,9 +750,9 @@ fun FarewellScreen(state: AppState, rules: Rules, onExport: () -> Unit, onUndo: 
         AnimatedVisibility(saved, enter = fadeIn(tween(Motion.ENTER)) + expandVertically(tween(Motion.ENTER)), exit = fadeOut(tween(Motion.EXIT)) + shrinkVertically(tween(Motion.EXIT))) {
             Column {
                 Spacer(Modifier.height(20.dp))
-                T("휴대폰에서 \"저장된 것을 확인했어요\"를 눌렀습니다. 차를 넘기기 전에 이 차에 남은 기록을 지울 수 있습니다.", Type.labelLarge.copy(fontWeight = Type.bodySmall.fontWeight), color = c.textSecondary)
+                T("휴대폰에서 \"저장된 것을 확인했어요\"를 눌렀습니다. 차를 넘기기 전에 카미고에 남은 기록을 지울 수 있습니다.", Type.labelLarge.copy(fontWeight = Type.bodySmall.fontWeight), color = c.textSecondary)
                 Spacer(Modifier.height(12.dp))
-                IviButton("차에 남은 기록 지우기", onWipe, filled = true)
+                IviButton("카미고 기록 지우기", onWipe, filled = true)
             }
         }
     }
@@ -751,7 +760,7 @@ fun FarewellScreen(state: AppState, rules: Rules, onExport: () -> Unit, onUndo: 
     // 3. 남은 순간들, 그리고 마지막 주행. 해마다 묶어 지나온 순서대로.
     @Composable
     fun pagesTitle() {
-        T(if (moments.isEmpty()) "마지막 주행" else "남은 순간 ${Fmt.n(moments.size)}장, 그리고 마지막 주행", Type.labelLarge, Modifier.appear(LATE), color = c.textTertiary)
+        T(if (moments.isEmpty()) "마지막 주행" else "함께한 순간 ${Fmt.n(moments.size)}장", Type.labelLarge, Modifier.appear(LATE), color = c.textTertiary)
     }
 
     @Composable
@@ -904,27 +913,28 @@ fun ExportPopup(state: AppState, sending: Sending, url: String?, onClose: () -> 
     val export = state.export
     val isLast = state.last == LastDrive.DONE
     val count = state.moments.size
+    var showContents by rememberSaveable { mutableStateOf(false) }
     when {
-        sending == Sending.UPLOADING -> IviPopup({}, buttons = { IviButton("올리는 중", {}, Modifier.weight(1f), loading = true) }) {
-            PopupTitle("기록을 올리는 중입니다", "지금까지의 순간과 숫자를 한 권으로 묶어 올리고 있습니다.")
+        sending == Sending.UPLOADING -> IviPopup({}, buttons = { IviButton("전송 중", {}, Modifier.weight(1f), loading = true) }) {
+            PopupTitle("기록을 전송하고 있습니다", "휴대폰에서 받아 볼 수 있도록 함께한 순간과 숫자를 전송하고 있습니다.")
         }
         sending == Sending.FAILED -> IviPopup(onClose, buttons = {
             IviButton("닫기", onClose, Modifier.weight(1f))
             IviButton("다시 시도", onRetry, Modifier.weight(1f), filled = true)
         }) {
-            PopupTitle("기록을 올리지 못했습니다", "차의 인터넷 연결을 확인한 뒤 다시 눌러 주세요. 차에 있는 기록은 그대로입니다.")
+            PopupTitle("기록을 전송하지 못했습니다", "차의 인터넷 연결을 확인한 뒤 다시 눌러 주세요. 차에 있는 기록은 그대로입니다.")
         }
         export?.savedAt != null -> IviPopup(onClose, buttons = {
             IviButton("닫기", onClose, Modifier.weight(1f))
-            if (isLast) IviButton("차에 남은 기록 지우기", onWipe, Modifier.weight(1.4f), filled = true)
+            if (isLast) IviButton("카미고 기록 지우기", onWipe, Modifier.weight(1.4f), filled = true)
         }) {
             PopupTitle(
-                "휴대폰에서 저장 확인을 눌렀습니다",
-                "휴대폰에서 \"저장된 것을 확인했어요\"를 눌렀습니다. 파일이 실제로 남았는지는 차가 알 수 없습니다. 서버에 올린 것은 7일 뒤 지워집니다.",
+                "휴대폰에서 저장 확인을 마쳤습니다",
+                "휴대폰에서 \"저장된 것을 확인했어요\"를 눌렀습니다. 카미고가 휴대폰의 파일을 직접 확인한 것은 아닙니다. 서버에 전송한 기록은 전송 후 7일 뒤 지워집니다.",
             )
             if (isLast) {
                 Spacer(Modifier.height(16.dp))
-                T("차를 넘기기 전에 이 차에 남은 기록을 지울 수 있습니다.", Type.bodySmall, color = c.textSecondary)
+                T("차를 넘기기 전에 카미고에 남은 기록을 지울 수 있습니다.", Type.bodySmall, color = c.textSecondary)
             }
         }
         export?.uploadedAt != null && url != null -> IviPopup(onClose, width = 980.dp, buttons = { IviButton("닫기", onClose, Modifier.weight(1f)) }) {
@@ -932,9 +942,14 @@ fun ExportPopup(state: AppState, sending: Sending, url: String?, onClose: () -> 
             Spacer(Modifier.height(24.dp))
             val words: @Composable ColumnScope.() -> Unit = {
                 val body = Type.labelLarge.copy(fontWeight = Type.bodySmall.fontWeight)
-                T("휴대폰으로 찍으면 함께한 기록이 한 권으로 열립니다. 열린 화면에서 이미지 묶음이나 PDF로 저장합니다.", body, color = c.textSecondary)
-                T("차 이름, 순간 ${count}장(시각, 계기판, 바깥 기온, 탄 자리 수), 함께한 날수와 거리, 도착한 횟수, 옆자리와 네 자리가 찬 날 수, 함께 쓴 전기가 들어갑니다. 위치는 들어가지 않습니다. 날씨를 남겼다면 관측소 이름이 함께 들어갑니다.", body, color = c.textSecondary)
-                T("\"기록 받아 가기\"를 누른 뒤에만 기록이 차 밖으로 나갑니다. 서버에 올려 전하고 7일 뒤 지웁니다.", Type.labelSmall, color = c.textTertiary)
+                T("휴대폰으로 QR을 찍어 기록을 열고, 이미지나 PDF로 저장해 주세요.", body, color = c.textSecondary)
+                T("함께한 순간과 숫자를 한 권의 기록으로 모았습니다.", body, color = c.textSecondary)
+                T("기록 모음은 ‘기록 받아 가기’를 누를 때 서버로 전송됩니다. 서버의 기록은 전송 후 7일 뒤 지워집니다.", Type.labelSmall, color = c.textTertiary)
+                IviButton(if (showContents) "포함되는 정보 접기" else "포함되는 정보", { showContents = !showContents }, size = ButtonSize.SMALL, quiet = true)
+                if (showContents) {
+                    T("차 이름, 함께한 날수와 거리, 순간 ${count}장, 도착 횟수, 동승한 날수, 함께 쓴 전기가 포함됩니다. 순간마다 날짜·시각, 계기판 거리, 바깥 기온, 탑승 좌석 수가 포함될 수 있습니다.", body, color = c.textSecondary)
+                    T("좌표와 탑승자의 신원은 포함되지 않습니다. 날씨를 남겼다면 관측소 이름이 포함되어 대략의 지역을 알 수 있습니다. 날씨 조회에는 별도로 관측소 번호와 날짜·시각을 전송합니다.", Type.labelSmall, color = c.textTertiary)
+                }
             }
             BoxWithConstraints {
                 if (maxWidth < 700.dp) {
@@ -962,7 +977,7 @@ fun WipeConfirmPopup(onNo: () -> Unit, onYes: () -> Unit) {
         IviButton("아직이요", onNo, Modifier.weight(1f))
         IviButton("지우기", onYes, Modifier.weight(1f), filled = true)
     }) {
-        PopupTitle("이 차에서 기록을 지울까요", "휴대폰에 저장한 한 권이 열리는지 먼저 확인해 주세요. 차에서 지우면 되돌릴 수 없습니다. 서버에 올린 것은 7일 뒤 지워집니다.")
+        PopupTitle("카미고의 기록을 지울까요?", "휴대폰에 저장한 이미지나 PDF가 열리는지 먼저 확인해 주세요. 카미고에서 지운 기록은 되돌릴 수 없습니다. 차량의 다른 앱이나 내비게이션 기록은 지우지 않습니다. 서버에 전송한 기록은 전송 후 7일 뒤 지워집니다.")
     }
 }
 
@@ -970,15 +985,15 @@ fun WipeConfirmPopup(onNo: () -> Unit, onYes: () -> Unit) {
 fun WipedScreen(wiped: Wiped, rules: Rules, onClose: () -> Unit) {
     CenterBox(Modifier.padding(Gutter)) {
         Column(Modifier.widthIn(max = 820.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            T("이 차에는 이제 기록이 없습니다", Type.titleLarge, align = TextAlign.Center)
+            T("카미고에 저장된 기록을 지웠습니다", Type.titleLarge, align = TextAlign.Center)
             Spacer(Modifier.height(16.dp))
             T(
-                "${Fmt.date(rules.date(wiped.receivedDay))}부터 함께한 ${Fmt.n(wiped.days)}일의 기록은 휴대폰에서 저장을 확인한 뒤 이 차에서 지웠습니다.",
+                "${Fmt.date(rules.date(wiped.receivedDay))}부터 함께한 ${Fmt.n(wiped.days)}일의 기록을 카미고에서 지웠습니다. 휴대폰에 저장한 파일은 그대로입니다.",
                 Type.bodySmall, color = Ivi.colors.textSecondary, align = TextAlign.Center,
             )
             Spacer(Modifier.height(28.dp))
             T(
-                "그동안 고생한 ${wiped.carName?.let { Fmt.cleanName(it) } ?: "이 차"}에게 마지막 인사를 해 주세요.",
+                "${Fmt.with(wiped.carName)} 함께한 시간을 오래 간직해 주세요.",
                 Type.titleSmall, align = TextAlign.Center,
             )
             Spacer(Modifier.height(40.dp))
@@ -1034,3 +1049,4 @@ private fun DemoRow(label: String, note: String, onClick: () -> Unit, enabled: B
         T(note, Type.bodySmall, Modifier.weight(1f), color = c.textSecondary)
     }
 }
+

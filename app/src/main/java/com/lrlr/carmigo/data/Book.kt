@@ -94,7 +94,7 @@ object Books {
             moments = state.moments.map { m ->
                 val minute = rules.minuteOfDay(m.at)
                 Book.Page(
-                    kind = m.kind.label, title = m.title, line = m.line, why = m.why,
+                    kind = m.kind.label, title = m.displayTitle, line = m.line, why = m.displayWhy,
                     date = rules.date(rules.day(m.at)).toString(),
                     time = if (m.hasTime) "%02d:%02d".format(minute / 60, minute % 60) else null,
                     minuteOfDay = if (m.hasTime) minute else null,
@@ -153,3 +153,4 @@ class BookClient(private val server: String) {
 
     private companion object { const val TAG = "DaysBook" }
 }
+

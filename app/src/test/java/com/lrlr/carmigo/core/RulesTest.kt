@@ -80,6 +80,17 @@ class RulesTest {
         assertEquals("40,000 km를 넘었습니다", r.drivingLine(c.state, t0))
     }
 
+    @Test fun earthAndMoonSpeechDescribeEquivalentDistance() {
+        for ((target, phrase) in listOf(40_075.0 to "지구 한 바퀴만큼", 384_400.0 to "달까지의 거리만큼")) {
+            var s = r.correctSetup(fresh(target - 10), day(2023, 7, 30), 0.0, t0, "흰둥이")
+            s = r.onGear(s, false, target - 10, alone, Snapshot(t0)).state
+            s = r.onOdometer(s, target - 5, Snapshot(t0)).state
+            val step = r.onOdometer(s, target - 3, Snapshot(t0))
+            assertEquals("약 3킬로미터 뒤에 흰둥이와 $phrase 함께 달리게 됩니다", step.speak)
+            assertNull(r.onOdometer(step.state, target - 2, Snapshot(t0)).speak)
+        }
+    }
+
     @Test fun nextTogetherIsTheNearestMilestone() {
         assertEquals(40_000, r.nextTogether(39_996.6))
         assertEquals(40_075, r.nextTogether(40_000.0))
@@ -87,7 +98,7 @@ class RulesTest {
         assertEquals(384_400, r.nextTogether(380_000.0))
         assertEquals(390_000, r.nextTogether(384_400.0))
         assertEquals("지구 두 바퀴", r.nearTogetherLabel(80_150))
-        assertEquals("지구 한 바퀴를 달렸습니다", r.passedTogetherLine(40_075))
+        assertEquals("지구 한 바퀴만큼 함께 달렸습니다", r.passedTogetherLine(40_075))
         assertEquals("이 차와", Fmt.with(null))
         assertEquals("은별과", Fmt.with("은별"))
     }
@@ -150,7 +161,7 @@ class RulesTest {
         s = r.onGear(s, false, null, two, Snapshot(t0)).state
         val end = r.onGear(s, true, null, two, Snapshot(t0 + 1000))
         assertEquals(50, end.state.counters.companionDays)
-        assertEquals("옆자리 50번째 날", end.added.single().title)
+        assertEquals("옆자리에 누군가 탄 50번째 날", end.added.single().title)
         // 같은 날 다시 타도 하루
         var again = r.onGear(end.state, false, null, two, Snapshot(t0 + 2000)).state
         again = r.onGear(again, true, null, two, Snapshot(t0 + 3000)).state
@@ -532,3 +543,4 @@ class RulesTest {
         assertEquals(com.lrlr.carmigo.data.WeatherAnswer.Found("비", null, true), com.lrlr.carmigo.data.WeatherClient.parse(200, "{\"sky\":\"비\",\"sample\":true}"))
     }
 }
+

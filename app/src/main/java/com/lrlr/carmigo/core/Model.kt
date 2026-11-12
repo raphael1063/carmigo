@@ -75,11 +75,15 @@ data class Moment(
     val seats: Int? = null,
     val seen: Boolean = false,
 ) {
+    /** 저장된 구형 문구도 화면·알림·새로 내보내는 기록에서 같은 표현으로 보여 준다. */
+    val displayTitle: String get() = MomentText.title(this)
+    val displayWhy: String get() = MomentText.explanation(this)
+
     /** 종류 표시 없이 제목만 놓이는 곳(작별 화면 목록, 알림)에서 쓰는 제목: "함께한 지 100일", "함께 40,000 km" */
     val fullTitle: String get() = when {
-        kind == MomentKind.DAYS && !title.startsWith("함께") -> "함께한 지 $title"
-        kind == MomentKind.DISTANCE && id.removePrefix("dist-").all { it.isDigit() } && id.startsWith("dist-") && !title.startsWith("함께") -> "함께 $title"
-        else -> title
+        kind == MomentKind.DAYS && !displayTitle.startsWith("함께") -> "함께한 지 $displayTitle"
+        kind == MomentKind.DISTANCE && id.removePrefix("dist-").all { it.isDigit() } && id.startsWith("dist-") && !displayTitle.startsWith("함께") -> "함께 $displayTitle"
+        else -> displayTitle
     }
 }
 
@@ -177,3 +181,4 @@ data class Seats(
     val isFull: Boolean get() = all.all { it == true }
     val hasCompanion: Boolean get() = passenger == true
 }
+

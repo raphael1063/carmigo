@@ -124,20 +124,21 @@ class Rules(
     }
 
     fun passedTogetherLine(m: Long): String = when {
-        m == MOON_KM.toLong() -> "달까지의 거리를 달렸습니다"
-        isEarth(m) -> "${earthWord(m)}를 달렸습니다"
+        m == MOON_KM.toLong() -> "달까지의 거리만큼 함께 달렸습니다"
+        isEarth(m) -> "${earthWord(m)}만큼 함께 달렸습니다"
         else -> "${Fmt.n(m)} km를 넘었습니다"
     }
 
     private fun togetherSpeech(m: Long, left: Double, name: String?): String {
         val what = when {
-            m == MOON_KM.toLong() -> "달까지의 거리가"
-            isEarth(m) -> "${earthWord(m)}가"
+            m == MOON_KM.toLong() -> "달까지의 거리만큼"
+            isEarth(m) -> "${earthWord(m)}만큼"
             else -> "${Fmt.n(m)}킬로미터가"
         }
         val whole = Math.round(left)
         val head = if (whole >= 1) "약 ${whole}킬로미터 뒤에" else "곧"
-        return "$head ${Fmt.with(name)} 함께 달린 거리가 $what 됩니다"
+        return if (m == MOON_KM.toLong() || isEarth(m)) "$head ${Fmt.with(name)} $what 함께 달리게 됩니다"
+        else "$head ${Fmt.with(name)} 함께 달린 거리가 $what 됩니다"
     }
 
     private fun digitsWord(n: Int) = when (n) { 5 -> "다섯"; 6 -> "여섯"; 7 -> "일곱"; else -> n.toString() }
@@ -325,7 +326,7 @@ class Rules(
             if (c.companionDays % COMPANION_STEP == 0) {
                 added += Moment(
                     id = "companion-${c.companionDays}", kind = MomentKind.PEOPLE,
-                    title = "옆자리 ${c.companionDays}번째 날",
+                    title = "옆자리에 누군가 탄 ${c.companionDays}번째 날",
                     line = watchLine(state, snap.now),
                     why = "누가 탔는지 차는 모릅니다. 옆자리가 찼던 날을 세었을 뿐입니다.",
                     at = snap.now, odoKm = end, outsideTempC = snap.outsideTempC, seats = seatCount,
@@ -364,7 +365,7 @@ class Rules(
             added += Moment(
                 id = "long-first", kind = MomentKind.DISTANCE,
                 title = "한 번에 ${Fmt.km(end - start)} km", line = "처음으로 한 번에 ${Fmt.n(LONG_TRIP_KM.toLong())}km를 넘긴 주행",
-                why = "출발할 때와 도착했을 때의 계기판 차이입니다.",
+                why = MomentText.LONG_WHY,
                 at = snap.now, odoKm = end, outsideTempC = snap.outsideTempC, seats = seatCount,
             )
         }
@@ -395,7 +396,7 @@ class Rules(
             out += Moment(
                 id = "newyear-$y", kind = MomentKind.SEASON,
                 title = "${y}년 첫 주행", line = tempLine(snap.outsideTempC) ?: "새해 들어 처음 마친 주행",
-                why = "${y}년 1월 1일 뒤로 처음 마친 주행입니다.",
+                why = "기록을 시작한 뒤, ${y}년에 처음 마친 주행입니다.",
                 at = snap.now, odoKm = odoKm, outsideTempC = snap.outsideTempC, seats = seats,
             )
         }
@@ -404,16 +405,16 @@ class Rules(
             val winter = if (today.monthValue <= 6) y - 1 else y
             if (!has("cold-$winter")) out += Moment(
                 id = "cold-$winter", kind = MomentKind.SEASON,
-                title = "첫 영하의 주행", line = "${winter}년 겨울 · ${tempLine(t)}",
-                why = "그해 겨울 처음으로, 주행을 마칠 때 차가 잰 바깥 기온이 영하였습니다.",
+                title = MomentText.COLD_TITLE, line = "${winter}년 겨울 · ${tempLine(t)}",
+                why = MomentText.COLD_WHY,
                 at = snap.now, odoKm = odoKm, outsideTempC = t, seats = seats,
             )
         }
         if (t != null && t >= HEAT_C) {
             if (!has("heat-$y")) out += Moment(
                 id = "heat-$y", kind = MomentKind.SEASON,
-                title = "첫 폭염의 주행", line = "${y}년 여름 · ${tempLine(t)}",
-                why = "그해 여름 처음으로 바깥 기온 ${HEAT_C.toInt()}° 이상에서 달렸습니다. 기상청은 하루 최고 기온 ${HEAT_C.toInt()}° 이상을 폭염 기준으로 씁니다. 기온은 차가 잰 값입니다.",
+                title = MomentText.HEAT_TITLE, line = "${y}년 여름 · ${tempLine(t)}",
+                why = MomentText.HEAT_WHY,
                 at = snap.now, odoKm = odoKm, outsideTempC = t, seats = seats,
             )
         }
@@ -709,3 +710,4 @@ class Rules(
         }.distinct().sorted()
     }
 }
+
