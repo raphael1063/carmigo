@@ -131,7 +131,7 @@ class Controller(private val context: Context) {
 
     private fun apply(step: Step, urgent: Boolean = true) {
         commit(stampStation(step.state, step.added), urgent)
-        step.speak?.let { speaker.say(it) }
+        step.speak?.let { speaker.say(it); if (!shown) notifier.ahead(it) }
         unannounced += step.added.map { it.fullTitle }
         announce()
     }
