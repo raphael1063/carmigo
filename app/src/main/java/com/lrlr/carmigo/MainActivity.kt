@@ -7,6 +7,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import com.lrlr.carmigo.ui.StationPopup
+import com.lrlr.carmigo.ui.WelcomeScreen
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -110,6 +111,8 @@ class MainActivity : ComponentActivity() {
                 var openId by rememberSaveable { mutableStateOf<String?>(null) }
                 var editing by rememberSaveable { mutableStateOf(false) }
                 var demoOpen by rememberSaveable { mutableStateOf(false) }
+                // 처음 여는 화면(로고, 이름, 한 줄, 시작하기). 시작하기를 누르면 첫 입력으로 넘어간다.
+                var welcomed by rememberSaveable { mutableStateOf(false) }
                 // 알림 권한은 주차 중에 운전자가 버튼을 눌렀을 때만 묻는다(첫 실행에는 묻지 않는다)
                 var notifyOn by remember { mutableStateOf(c.notifier.enabled()) }
                 val askNotify = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { notifyOn = c.notifier.enabled() }
@@ -123,6 +126,8 @@ class MainActivity : ComponentActivity() {
                 val askLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> if (granted) locate() }
 
                 val setup = state.setup
+                // 기록을 지우고 처음으로 돌아가면 여는 화면부터 다시 보인다
+                LaunchedEffect(setup == null) { if (setup != null) welcomed = false }
                 val driving = state.drive != null || restricted || gear == Gear.MOVING
                 // 달리기 시작하면 열려 있던 창을 모두 닫는다
                 LaunchedEffect(driving) { if (driving) { overlay = Overlay.NONE; openId = null; editing = false } }
@@ -152,7 +157,11 @@ class MainActivity : ComponentActivity() {
                                 onCancel = { editing = false },
                             )
                         }
-                        setup == null -> OnboardingScreen(odo ?: state.lastOdoKm, rules.date(rules.day(now)), c::begin, onSecret = { demoOpen = true })
+                        setup == null && !welcomed -> WelcomeScreen(onStart = { welcomed = true }, onSecret = { demoOpen = true })
+                        setup == null -> {
+                            BackHandler { welcomed = false }
+                            OnboardingScreen(odo ?: state.lastOdoKm, rules.date(rules.day(now)), c::begin, onSecret = { demoOpen = true })
+                        }
                         else -> BoxWithConstraints(Modifier.fillMaxSize()) {
                             val compact = maxWidth < 1400.dp
                             val done = state.last == LastDrive.DONE

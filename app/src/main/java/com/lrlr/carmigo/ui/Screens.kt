@@ -135,10 +135,6 @@ fun OnboardingScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.widthIn(max = 880.dp).fillMaxWidth()) {
-                if (!editing) {
-                    LogoMark(56.dp)
-                    Spacer(Modifier.height(16.dp))
-                }
                 T(if (editing) "처음 등록한 정보 수정" else "이 차와 언제부터 함께하셨나요", Type.titleLarge, Modifier.secret(onSecret))
                 Spacer(Modifier.height(12.dp))
                 T(
@@ -270,6 +266,22 @@ private fun StepButton(sign: String, description: String, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         T(sign, Type.titleMedium, color = c.textSecondary)
+    }
+}
+
+/** 처음 여는 화면: 로고와 이름, 한 줄, 시작하기. 이름이나 로고를 길게 누르면 시연 모드 창을 연다. */
+@Composable
+fun WelcomeScreen(onStart: () -> Unit, onSecret: () -> Unit = {}) {
+    CenterBox(Modifier.padding(Gutter)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            LogoMark(144.dp, Modifier.appear(0, scaleFrom = 0.92f).secret(onSecret))
+            Spacer(Modifier.height(36.dp))
+            T(stringResource(R.string.app_name), Type.headlineLarge, Modifier.appear(1).secret(onSecret))
+            Spacer(Modifier.height(12.dp))
+            T("내가 이 차를 만난 날부터", Type.bodyLarge, Modifier.appear(2), color = Ivi.colors.textSecondary)
+            Spacer(Modifier.height(56.dp))
+            IviButton("시작하기", onStart, Modifier.widthIn(min = 360.dp).appear(3), filled = true, size = ButtonSize.LARGE)
+        }
     }
 }
 
