@@ -571,7 +571,7 @@ private fun ColumnScope.Counted(state: AppState, rules: Rules, now: Long, onEdit
     Spacer(Modifier.height(28.dp))
     FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         IviButton("처음 등록한 정보 수정", onEdit, size = ButtonSize.SMALL, quiet = true)
-        if (!notifyOn) IviButton("주차 중 알림 받기", onNotify, size = ButtonSize.SMALL, quiet = true)
+        if (!notifyOn) IviButton("알림 받기", onNotify, size = ButtonSize.SMALL, quiet = true)
         IviButton(if (setup.stationName == null) "그날의 날씨 남기기" else "관측소 바꾸기", onWeather, size = ButtonSize.SMALL, quiet = true)
     }
     Spacer(Modifier.height(12.dp))
@@ -582,8 +582,8 @@ private fun ColumnScope.Counted(state: AppState, rules: Rules, now: Long, onEdit
     )
     Spacer(Modifier.height(12.dp))
     T(
-        if (notifyOn) "화면을 닫아 둔 사이에 새 순간이 남거나 휴대폰에서 저장을 확인하면 차를 세웠을 때 알림으로 알립니다. 달리는 동안에는 알리지 않습니다."
-        else "알림을 받으면 화면을 닫아 둔 사이에 남은 새 순간과 휴대폰의 저장 확인을 차를 세웠을 때 알려 줍니다.",
+        if (notifyOn) "화면을 닫아 둔 사이에 새 순간이 남거나 휴대폰에서 저장을 확인하면 차를 세웠을 때 알림으로 알립니다. 달리는 동안에는 다가오는 이정표만 음성 안내와 같은 한 줄로 잠깐 보여 줍니다."
+        else "알림을 받으면 화면을 닫아 둔 사이에 남은 새 순간과 휴대폰의 저장 확인을 차를 세웠을 때 알려 주고, 달리는 동안에는 다가오는 이정표를 한 줄로 잠깐 보여 줍니다.",
         Type.labelSmall, color = Ivi.colors.textTertiary,
     )
 }
