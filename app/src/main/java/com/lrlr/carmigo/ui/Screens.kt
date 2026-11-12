@@ -136,8 +136,8 @@ fun OnboardingScreen(
         ) {
             Column(Modifier.widthIn(max = 880.dp).fillMaxWidth()) {
                 if (!editing) {
-                    LogoMark(72.dp)
-                    Spacer(Modifier.height(24.dp))
+                    LogoMark(56.dp)
+                    Spacer(Modifier.height(16.dp))
                 }
                 T(if (editing) "처음 등록한 정보 수정" else "이 차와 언제부터 함께하셨나요", Type.titleLarge, Modifier.secret(onSecret))
                 Spacer(Modifier.height(12.dp))
@@ -767,7 +767,7 @@ fun FarewellScreen(state: AppState, rules: Rules, onExport: () -> Unit, onUndo: 
                 Spacer(Modifier.height(20.dp))
                 T("휴대폰에서 \"저장된 것을 확인했어요\"를 눌렀습니다. 차를 넘기기 전에 카미고에 남은 기록을 지울 수 있습니다.", Type.labelLarge.copy(fontWeight = Type.bodySmall.fontWeight), color = c.textSecondary)
                 Spacer(Modifier.height(12.dp))
-                IviButton("카미고 기록 지우기", onWipe, filled = true)
+                IviButton("카미고 기록 지우기", onWipe, filled = true, neutral = true)
             }
         }
     }
@@ -941,7 +941,7 @@ fun ExportPopup(state: AppState, sending: Sending, url: String?, onClose: () -> 
         }
         export?.savedAt != null -> IviPopup(onClose, buttons = {
             IviButton("닫기", onClose, Modifier.weight(1f))
-            if (isLast) IviButton("카미고 기록 지우기", onWipe, Modifier.weight(1.4f), filled = true)
+            if (isLast) IviButton("카미고 기록 지우기", onWipe, Modifier.weight(1.4f), filled = true, neutral = true)
         }) {
             PopupTitle(
                 "휴대폰에서 저장 확인을 마쳤습니다",
@@ -990,7 +990,7 @@ fun ExportPopup(state: AppState, sending: Sending, url: String?, onClose: () -> 
 fun WipeConfirmPopup(onNo: () -> Unit, onYes: () -> Unit) {
     IviPopup(onNo, buttons = {
         IviButton("아직이요", onNo, Modifier.weight(1f))
-        IviButton("지우기", onYes, Modifier.weight(1f), filled = true)
+        IviButton("지우기", onYes, Modifier.weight(1f), filled = true, neutral = true)
     }) {
         PopupTitle("카미고의 기록을 지울까요?", "휴대폰에 저장한 이미지나 PDF가 열리는지 먼저 확인해 주세요. 카미고에서 지운 기록은 되돌릴 수 없습니다. 차량의 다른 앱이나 내비게이션 기록은 지우지 않습니다. 서버에 전송한 기록은 전송 후 7일 뒤 지워집니다.")
     }

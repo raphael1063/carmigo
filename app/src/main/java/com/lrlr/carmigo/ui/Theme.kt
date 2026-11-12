@@ -47,6 +47,11 @@ data class IviColors(
     val negative: Color,
     /** 카미고 로고 색에서 온 포인트 색: 새 순간 표시처럼 눈길이 가야 하는 작은 글자와 테두리에만 쓴다 */
     val accent: Color,
+    /** 되돌릴 수 없는 동작(기록 지우기)의 채운 버튼은 로고 색 대신 OS 기본 중립색을 쓴다 */
+    val buttonNeutralEnabled: Color,
+    val buttonNeutralPressed: Color,
+    val onButtonNeutral: Color,
+    val dark: Boolean,
 )
 
 private val Ink = Color(0xFF131417)
@@ -78,6 +83,10 @@ val IviLight = IviColors(
     positive = Color(0xFF0064FF),
     negative = Color(0xFFFE3D16),
     accent = Color(0xFF1F5E5C),
+    buttonNeutralEnabled = Color(0xFF44464E),
+    buttonNeutralPressed = Color(0xFF313236),
+    onButtonNeutral = Color.White,
+    dark = false,
 )
 
 val IviDark = IviColors(
@@ -100,6 +109,10 @@ val IviDark = IviColors(
     positive = Color(0xFF0082FF),
     negative = Color(0xFFFF4C28),
     accent = BrandCream,
+    buttonNeutralEnabled = Color(0xFFE0E1E6),
+    buttonNeutralPressed = Color(0xFFC7C9CE),
+    onButtonNeutral = Ink,
+    dark = true,
 )
 
 private val LocalIvi = staticCompositionLocalOf { IviLight }

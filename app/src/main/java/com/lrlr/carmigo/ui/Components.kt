@@ -15,6 +15,7 @@ import kotlinx.coroutines.delay
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -108,6 +109,8 @@ fun IviButton(
     loading: Boolean = false,
     /** 눈에 덜 띄어야 하는 버튼(마지막 주행)의 글자색 */
     quiet: Boolean = false,
+    /** 되돌릴 수 없는 동작: 채운 버튼이어도 로고 색 대신 중립색 */
+    neutral: Boolean = false,
 ) {
     val c = Ivi.colors
     val source = remember { MutableInteractionSource() }
@@ -116,12 +119,14 @@ fun IviButton(
     val scale by animateFloatAsState(if (pressed && active) 0.95f else 1f, tween(100), label = "press")
     val bg = when {
         !active -> c.buttonBasicEnabled
+        filled && neutral -> if (pressed) c.buttonNeutralPressed else c.buttonNeutralEnabled
         filled -> if (pressed) c.buttonFilledPressed else c.buttonFilledEnabled
         else -> if (pressed) c.buttonBasicPressed else c.buttonBasicEnabled
     }
     val fg = when {
         // 흐린 버튼은 누를 수 없을 때에도 읽을 수 있어야 한다("마지막 주행"은 주행 중에도 보인다)
         !active -> if (quiet) c.textTertiary else c.textQuaternary
+        filled && neutral -> c.onButtonNeutral
         filled -> c.onButtonFilled
         quiet -> c.textTertiary
         else -> c.textPrimary
@@ -332,6 +337,9 @@ fun LogoMark(size: Dp, modifier: Modifier = Modifier) {
     Image(
         painter = androidx.compose.ui.res.painterResource(com.lrlr.carmigo.R.drawable.logo_mark),
         contentDescription = null,
-        modifier = modifier.size(size),
+        // 다크 모드에서는 짙은 청록 판이 배경에 묻히지 않게 옅은 크림 테두리를 두른다
+        modifier = modifier.size(size).then(
+            if (Ivi.colors.dark) Modifier.border(1.5.dp, BrandCream.copy(alpha = 0.45f), RoundedCornerShape(size * 0.25f)) else Modifier
+        ),
     )
 }
