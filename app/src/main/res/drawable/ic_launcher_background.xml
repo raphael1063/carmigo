@@ -1,3 +1,4 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#FF131417" />
+    <!-- 카미고 로고의 짙은 청록 -->
+    <solid android:color="@color/brand_teal" />
 </shape>

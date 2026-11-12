@@ -9,6 +9,8 @@
     <style name="Theme.Days.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/bg</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <!-- 아이콘만 로고 색 판 위에 올리고, 바탕은 시스템과 같은 앱 배경색을 둔다 -->
+        <item name="windowSplashScreenIconBackgroundColor">@color/brand_teal</item>
         <item name="windowSplashScreenAnimationDuration">300</item>
         <item name="postSplashScreenTheme">@style/Theme.Days</item>
     </style>

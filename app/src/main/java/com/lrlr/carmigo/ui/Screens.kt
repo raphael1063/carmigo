@@ -135,6 +135,10 @@ fun OnboardingScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.widthIn(max = 880.dp).fillMaxWidth()) {
+                if (!editing) {
+                    LogoMark(72.dp)
+                    Spacer(Modifier.height(24.dp))
+                }
                 T(if (editing) "처음 등록한 정보 수정" else "이 차와 언제부터 함께하셨나요", Type.titleLarge, Modifier.secret(onSecret))
                 Spacer(Modifier.height(12.dp))
                 T(
@@ -274,6 +278,8 @@ private fun StepButton(sign: String, description: String, onClick: () -> Unit) {
 fun ParkFirstScreen() {
     CenterBox(Modifier.padding(Gutter)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            LogoMark(96.dp)
+            Spacer(Modifier.height(24.dp))
             T(stringResource(R.string.app_name), Type.titleLarge)
             Spacer(Modifier.height(16.dp))
             T("주차한 뒤에 시작할 수 있습니다", Type.bodyLarge, color = Ivi.colors.textSecondary)
@@ -317,6 +323,10 @@ fun TopBar(
         Column(Modifier.fillMaxWidth().padding(horizontal = Gutter).padding(top = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // 날수와 거리는 탭 맨 위에서 한 번만 보여 준다. 여기는 앱 이름만.
+                if (!minimal) {
+                    LogoMark(32.dp)
+                    Spacer(Modifier.width(12.dp))
+                }
                 T(if (minimal) "" else stringResource(R.string.app_name), Type.labelLarge, Modifier.weight(1f).secret(onDemo), color = c.textSecondary)
                 demoTag()
                 if (state.demo && !minimal) Spacer(Modifier.width(12.dp))
@@ -326,7 +336,11 @@ fun TopBar(
         }
     } else {
         Box(Modifier.fillMaxWidth().height(112.dp).padding(horizontal = Gutter)) {
-            if (!minimal) T(stringResource(R.string.app_name), Type.titleSmall, Modifier.align(Alignment.CenterStart).secret(onDemo))
+            if (!minimal) Row(Modifier.align(Alignment.CenterStart).secret(onDemo), verticalAlignment = Alignment.CenterVertically) {
+                LogoMark(44.dp)
+                Spacer(Modifier.width(16.dp))
+                T(stringResource(R.string.app_name), Type.titleSmall)
+            }
             if (tab != null) {
                 IviTabs(listOf("순간", "숫자"), tab, { if (it == 0) state.unseen else 0 }, onTab, Modifier.align(Alignment.Center))
             }
@@ -383,13 +397,14 @@ private fun MomentCard(m: Moment, rules: Rules, onClick: () -> Unit) {
     val c = Ivi.colors
     Column(
         Modifier.fillMaxWidth().heightIn(min = 240.dp).clip(RoundedCornerShape(28.dp)).background(c.backgroundSecondary)
+            .then(if (!m.seen) Modifier.border(2.dp, c.accent.copy(alpha = 0.55f), RoundedCornerShape(28.dp)) else Modifier)
             .pressable(onClick = onClick).padding(28.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(22.dp).clip(CircleShape).background(skyBrush(if (m.hasTime) rules.minuteOfDay(m.at) else null, m.weather?.sky)).border(2.dp, Ivi.colors.textTertiary, CircleShape))
             Spacer(Modifier.width(10.dp))
             T(m.kind.label, Type.labelSmall, Modifier.weight(1f), color = c.textTertiary, maxLines = 1)
-            if (!m.seen) T("새 순간", Type.labelSmall.copy(fontWeight = Type.labelLarge.fontWeight), color = c.textPrimary)
+            if (!m.seen) T("새 순간", Type.labelSmall.copy(fontWeight = Type.labelLarge.fontWeight), color = c.accent)
         }
         Spacer(Modifier.height(14.dp))
         T(m.displayTitle, Type.titleSmall, maxLines = 2)
@@ -985,6 +1000,8 @@ fun WipeConfirmPopup(onNo: () -> Unit, onYes: () -> Unit) {
 fun WipedScreen(wiped: Wiped, rules: Rules, onClose: () -> Unit) {
     CenterBox(Modifier.padding(Gutter)) {
         Column(Modifier.widthIn(max = 820.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            LogoMark(88.dp)
+            Spacer(Modifier.height(28.dp))
             T("카미고에 저장된 기록을 지웠습니다", Type.titleLarge, align = TextAlign.Center)
             Spacer(Modifier.height(16.dp))
             T(

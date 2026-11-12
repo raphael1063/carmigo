@@ -45,9 +45,18 @@ data class IviColors(
     /** informative_positive: 활성 상태와 새 소식에만 쓰는 포인트 색 */
     val positive: Color,
     val negative: Color,
+    /** 카미고 로고 색에서 온 포인트 색: 새 순간 표시처럼 눈길이 가야 하는 작은 글자와 테두리에만 쓴다 */
+    val accent: Color,
 )
 
 private val Ink = Color(0xFF131417)
+
+/**
+ * 카미고 로고 색. 바탕, 글자, 위계는 OS 가이드를 그대로 두고,
+ * 채운 버튼과 새 소식 표시만 로고의 청록과 크림으로 바꿔 앱의 얼굴을 만든다.
+ */
+val BrandTeal = Color(0xFF13393B)
+val BrandCream = Color(0xFFFDE7CB)
 
 val IviLight = IviColors(
     backgroundPrimary = Color(0xFFF7F8FA),
@@ -61,13 +70,14 @@ val IviLight = IviColors(
     textQuaternary = Ink.copy(alpha = 0.32f),
     buttonBasicEnabled = Ink.copy(alpha = 0.05f),
     buttonBasicPressed = Ink.copy(alpha = 0.10f),
-    buttonFilledEnabled = Color(0xFF44464E),
-    buttonFilledPressed = Color(0xFF313236),
-    onButtonFilled = Color.White,
+    buttonFilledEnabled = BrandTeal,
+    buttonFilledPressed = Color(0xFF0C2728),
+    onButtonFilled = BrandCream,
     divider = Color(0xFFE0E1E6),
     dim = Ink.copy(alpha = 0.60f),
     positive = Color(0xFF0064FF),
     negative = Color(0xFFFE3D16),
+    accent = Color(0xFF1F5E5C),
 )
 
 val IviDark = IviColors(
@@ -82,13 +92,14 @@ val IviDark = IviColors(
     textQuaternary = Color.White.copy(alpha = 0.32f),
     buttonBasicEnabled = Color.White.copy(alpha = 0.05f),
     buttonBasicPressed = Color.White.copy(alpha = 0.10f),
-    buttonFilledEnabled = Color(0xFFE0E1E6),
-    buttonFilledPressed = Color(0xFFC7C9CE),
-    onButtonFilled = Ink,
+    buttonFilledEnabled = BrandCream,
+    buttonFilledPressed = Color(0xFFEFD3AF),
+    onButtonFilled = BrandTeal,
     divider = Color(0xFF44464E),
     dim = Color.Black.copy(alpha = 0.60f),
     positive = Color(0xFF0082FF),
     negative = Color(0xFFFF4C28),
+    accent = BrandCream,
 )
 
 private val LocalIvi = staticCompositionLocalOf { IviLight }

@@ -2,4 +2,7 @@
 <resources>
     <!-- Pleos Connect background_primary (light: basic_50) -->
     <color name="bg">#FFF7F8FA</color>
+    <!-- 카미고 로고 색: 짙은 청록과 크림 -->
+    <color name="brand_teal">#FF13393B</color>
+    <color name="brand_cream">#FFFDE7CB</color>
 </resources>

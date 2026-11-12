@@ -325,3 +325,13 @@ private fun qrBitmap(text: String): Bitmap? = try {
 } catch (e: Exception) {
     null
 }
+
+/** 카미고 로고(청록 판 위의 크림색 차). 앱 이름 옆과 첫 화면, 마지막 화면에만 둔다. */
+@Composable
+fun LogoMark(size: Dp, modifier: Modifier = Modifier) {
+    Image(
+        painter = androidx.compose.ui.res.painterResource(com.lrlr.carmigo.R.drawable.logo_mark),
+        contentDescription = null,
+        modifier = modifier.size(size),
+    )
+}
