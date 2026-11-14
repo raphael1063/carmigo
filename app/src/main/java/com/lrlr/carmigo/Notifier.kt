@@ -80,6 +80,6 @@ class Notifier(private val context: Context) {
         private const val ID_MOMENT = 2
         private const val ID_SAVED = 3
         private const val ID_AHEAD = 4
-        private const val AHEAD_MS = 8_000L
+        private const val AHEAD_MS = 5_000L
     }
 }
