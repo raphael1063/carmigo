@@ -280,4 +280,5 @@ Kotlin과 Jetpack Compose로 차량 앱을 구현했으며, 기록 받아 가기
 - 구성 자료: 5번 항목의 차량 앱·서버·휴대폰 역할과 데이터 흐름. 상세 구성도와 클래스별 역할은 저장소 README를 참고합니다.
 - 기획 참고: 헤이딜러 "나의 운전 졸업식" 캠페인 소개(보그 코리아 광고 콘텐츠, 2025). 정든 차와의 이별을 기록한 사례이며 시장 수요의 정량 근거는 아닙니다. https://www.vogue.co.kr/?p=643012
 - 기술 참고: Pleos Playground 개발 문서(Vehicle SDK, TextToSpeech, FusedLocation, NaviHelper)와 Pleos Connect UI Design Guide. 구체적인 사용·확인 범위는 5번 항목에 적었습니다.
+- 시연 영상: 제출 메일에 첨부한 테오로빈_카미고_시연영상.mp4(2분 48초, 1920×1080). 처음 만난 날부터 차를 보내는 날까지의 흐름을 실제 에뮬레이터 화면으로 보여줍니다.
 - 소스 코드·APK·실행 안내: https://github.com/raphael1063/carmigo (차량 앱 소스와 테스트, APK는 apk/ 폴더, 시연 순서는 README).
