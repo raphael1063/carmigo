@@ -54,7 +54,7 @@ class Notifier(private val context: Context) {
     fun moments(titles: List<String>) {
         if (titles.isEmpty()) return
         val text = if (titles.size == 1) titles[0] else "${titles[0]} 외 ${titles.size - 1}장"
-        post(ID_MOMENT, context.getString(R.string.notify_moment), text)
+        post(ID_MOMENT, context.getString(R.string.notify_moment), text, BRIEF_MS)
     }
 
     fun saved(canWipe: Boolean) {
@@ -66,7 +66,7 @@ class Notifier(private val context: Context) {
 
     /** 이정표 3km 전: 음성 안내와 같은 문장을 화면 위에 한 줄로 잠깐 띄운다. */
     fun ahead(speech: String) {
-        post(ID_AHEAD, context.getString(R.string.app_name), speech.replace("킬로미터", "km"), AHEAD_MS)
+        post(ID_AHEAD, context.getString(R.string.app_name), speech.replace("킬로미터", "km"), BRIEF_MS)
     }
 
     /** 화면을 열면 알림은 할 일을 다했다 */
@@ -80,6 +80,7 @@ class Notifier(private val context: Context) {
         private const val ID_MOMENT = 2
         private const val ID_SAVED = 3
         private const val ID_AHEAD = 4
-        private const val AHEAD_MS = 5_000L
+        /** 화면 위 알림은 5초 뒤 스스로 사라진다(이정표 안내, 새 순간). 카드는 앱의 순간 탭에 남는다 */
+        private const val BRIEF_MS = 5_000L
     }
 }
